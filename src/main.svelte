@@ -36,12 +36,12 @@
 <div class="app">
   <Renderer bind:this={renderer} simulation={simulation} />
   <Synth simulation={simulation} />
-  {#if !hasAudioContext}
-    <div class="play">
-      <div><div /></div>
-    </div>
-  {/if}
 </div>
+{#if !hasAudioContext}
+  <div class="play">
+    <div><div /></div>
+  </div>
+{/if}
 <div class="credits">
   <a href="https://dani.gatunes.com" rel="noopener noreferrer" target="_blank">dani@gatunes</a> © 2022
 </div>
@@ -77,7 +77,6 @@
   }
 
   .app {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -85,12 +84,12 @@
   }
 
   .play {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
   }
 
   .play > div {
