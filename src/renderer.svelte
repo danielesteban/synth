@@ -13,14 +13,15 @@
     ctx.strokeStyle = `hsl(0, 0%, 10%)`;
     ctx.stroke(grid);
     ctx.lineWidth = 2;
-    simulation.dots.forEach(({ color, position, scale, hit }) => {
+    simulation.dots && simulation.dots.forEach(({ color, radius, body, hit }) => {
+      const position = body.translation();
       ctx.fillStyle = `hsl(${color * 360}, 60%, ${50 + hit * 50}%)`;
       ctx.strokeStyle = `hsl(${color * 360}, 60%, 40%)`;
       ctx.beginPath();
-      ctx.arc(position.x, position.y, scale, 0, Math.PI * 2);
+      ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(position.x, position.y, scale - 1, 0, Math.PI * 2);
+      ctx.arc(position.x, position.y, radius - 1, 0, Math.PI * 2);
       ctx.stroke();
     });
   };

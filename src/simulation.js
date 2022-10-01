@@ -1,33 +1,77 @@
+import Rapier from '@dimforge/rapier2d-compat';
+
 class Simulation {
   constructor({ count, size }) {
-    this.dots = Array.from({ length: count }, (v, i) => {
-      const s = 1 + Math.random() * 2;
-      const scale = 4 + s * 3;
-      const direction = {
-        x: Math.random() - 0.5,
-        y: Math.random() - 0.5,
-      };
-      const l = Math.sqrt(direction.x ** 2 + direction.y ** 2);
-      direction.x /= l;
-      direction.y /= l;
-      return {
-        color: (i / 7) % 1,
-        hit: 0,
-        note: i,
-        duration: s * 0.5,
-        position: {
-          x: scale + Math.random() * (size.x - scale * 2),
-          y: scale + Math.random() * (size.y - scale * 2),
-        },
-        scale,
-        direction,
-        speed: (4 - s) * 5,
-      };
-    });
+    this.count = count;
     this.size = size;
-    for (let i = 0; i < 100; i++) {
-      this.step(1 / 60);
-    }
+    Rapier.init()
+      .then(() => {
+        this.world = new Rapier.World({ x: 0, y: 0 });
+        this.dots = [];
+        for (let i = 0; i < count; i++) {
+          const s = 1 + Math.random() * 2;
+          const radius = 4 + s * 3;
+          const position = { x: 0, y: 0 };
+          const findPosition = () => {
+            position.x = radius + Math.random() * (size.x - radius * 2);
+            position.y = radius + Math.random() * (size.y - radius * 2);
+            for (let j = 0; j < i; j++) {
+              const d = this.dots[j];
+              const t = d.body.translation();
+              if (Math.sqrt((position.x - t.x) ** 2 + (position.y - t.y) ** 2) <= (radius + d.radius)) {
+                return false;
+              }
+            }
+            return true;
+          };
+          while (true) {
+            if (findPosition()) {
+              break;
+            }
+          }
+          const direction = {
+            x: Math.random() - 0.5,
+            y: Math.random() - 0.5,
+          };
+          const l = Math.sqrt(direction.x ** 2 + direction.y ** 2);
+          direction.x /= l;
+          direction.y /= l;
+          const speed = (4 - s) * 3;
+          const body = this.world.createRigidBody(
+            Rapier.RigidBodyDesc.dynamic()
+              .setAngularDamping(1)
+              .setLinearDamping(0)
+              .setTranslation(position.x, position.y)
+              .setLinvel(direction.x * speed, direction.y * speed)
+          );
+          const collider = this.world.createCollider(
+            Rapier.ColliderDesc.ball(radius)
+              .setMass(radius * 10)
+              .setFriction(0)
+              .setRestitution(1),
+            body
+          );
+          this.dots.push({
+            note: i,
+            duration: s * 0.5,
+            color: (i / 7) % 1,
+            radius,
+            hit: 0,
+            body,
+            collider,
+          });
+        }
+        for (let i = 0; i < 2; i++) {
+          this.world.createCollider(
+            Rapier.ColliderDesc.cuboid(size.x * 0.5, 10)
+              .setTranslation(size.x * 0.5, i === 0 ? -10 : size.y + 10)
+          );
+          this.world.createCollider(
+            Rapier.ColliderDesc.cuboid(10, size.y * 0.5)
+              .setTranslation(i === 0 ? -10 : size.x + 10, size.y * 0.5)
+          );
+        }
+      });
   }
 
   hit(dot) {
@@ -39,40 +83,23 @@ class Simulation {
   }
 
   step(delta) {
-    const { dots, size } = this;
+    const { dots, world } = this;
+    if (!world) {
+      return;
+    }
+    world.timestep = delta * 2;
+    world.step();
+
     const count = dots.length;
     for (let i = 0; i < count; i++) {
       const dot = dots[i];
-
-      dot.position.x += dot.direction.x * dot.speed * delta;
-      dot.position.y += dot.direction.y * dot.speed * delta;
-
-      if (dot.position.x < dot.scale || dot.position.x > size.x - dot.scale) {
-        dot.position.x = Math.min(Math.max(dot.position.x, dot.scale), size.x - dot.scale);
-        dot.direction.x *= -1;
-        this.hit(dot);
-      }
-      if (dot.position.y < dot.scale || dot.position.y > size.y - dot.scale) {
-        dot.position.y = Math.min(Math.max(dot.position.y, dot.scale), size.y - dot.scale);
-        dot.direction.y *= -1;
-        this.hit(dot);
-      }
-
-      for (let j = i + 1; j < count; j++) {
-        const d = dots[j];
-        const dx = dot.position.x - d.position.x;
-        const dy = dot.position.y - d.position.y;
-        const dist = Math.sqrt(dx ** 2 + dy ** 2);
-        if (dist <= (dot.scale + d.scale)) {
-          dot.direction.x = dx / dist;
-          dot.direction.y = dy / dist;
-          this.hit(dot);
-          d.direction.x = -dot.direction.x;
-          d.direction.y = -dot.direction.y;
-          this.hit(d);
-        }
-      }
-
+      world.contactsWith(dot.collider, (collider) => {
+        world.contactPair(dot.collider, collider, (manifold) => {
+          if (manifold.contactDist() < 0) {
+            this.hit(dot);
+          }
+        });
+      });
       dot.hit = Math.max(dot.hit - delta * 2, 0);
     }
   }

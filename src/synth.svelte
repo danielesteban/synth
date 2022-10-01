@@ -45,7 +45,7 @@
     vibrato.output.gain.setValueAtTime(30, context.currentTime);
     vibrato.connect(vibrato.output);
 
-    voices = Array.from({ length: simulation.dots.length }, (v, i) => {
+    voices = Array.from({ length: simulation.count }, (v, i) => {
       const octave = 2 + Math.floor(i / 7) + (i > 7 ? 1 : 0);
       const note = (octave * 12) + roots.indexOf(root) + scale.intervals[i % 7];    
       const voice = new Voice({ context, note, waves });
@@ -65,7 +65,7 @@
       voice.output.connect(channel.input);
 
       const delay = context.createDelay();
-      delay.delayTime.setValueAtTime(0.3, context.currentTime);
+      delay.delayTime.setValueAtTime(0.5, context.currentTime);
       delay.feedback = context.createGain();
       delay.feedback.gain.setValueAtTime(0.5, context.currentTime);
       delay.connect(delay.feedback);

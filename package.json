@@ -6,6 +6,9 @@
     "build": "rollup -c rollup.config.js",
     "start": "npm run build -- -w"
   },
+  "dependencies": {
+    "@dimforge/rapier2d-compat": "^0.9.0"
+  },
   "devDependencies": {
     "@rollup/plugin-html": "^0.2.4",
     "@rollup/plugin-node-resolve": "^14.1.0",
