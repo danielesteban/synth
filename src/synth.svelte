@@ -46,7 +46,7 @@
     vibrato.connect(vibrato.output);
 
     voices = Array.from({ length: simulation.count }, (v, i) => {
-      const octave = 2 + Math.floor(i / 7) + (i > 7 ? 1 : 0);
+      const octave = 3 + Math.floor(i / 7);
       const note = (octave * 12) + roots.indexOf(root) + scale.intervals[i % 7];    
       const voice = new Voice({ context, note, waves });
       voice.oscillators.forEach((oscillator) => (
@@ -56,8 +56,8 @@
       const channel = new Channel({
         context,
         filters: [
-          { type: 'bandpass', frequency: 100, Q: 0.5 },
-          { type: 'distortion', amount: 128 },
+          { type: 'distortion', amount: 256 },
+          { type: 'bandpass', frequency: 200 + Math.random() * 100, Q: 0.5 },
         ],
         gain: 0.5,
       });  
