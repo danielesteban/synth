@@ -91,7 +91,6 @@ class Simulation {
           );
           const collider = this.world.createCollider(
             Rapier.ColliderDesc.ball(radius)
-              .setMass(radius * 10)
               .setFriction(0)
               .setRestitution(1),
             body
