@@ -69,6 +69,9 @@ class Channel {
             filter.curve = getDistortionCurve(amount);
             filter.oversample = '4x';
             break;
+          case 'panner':
+            filter = context.createPanner();
+            break;
           default:
             filter = context.createBiquadFilter();
             filter.type = type;

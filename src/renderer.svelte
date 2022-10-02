@@ -13,10 +13,23 @@
     ctx.strokeStyle = `hsl(0, 0%, 10%)`;
     ctx.stroke(grid);
     ctx.lineWidth = 2;
+    simulation.boxes && simulation.boxes.forEach(({ body, extents }) => {
+      const position = body.translation();
+      const rotation = body.rotation();
+      ctx.fillStyle = `hsl(0, 0%, 30%)`;
+      ctx.strokeStyle = `hsl(0, 0%, 20%)`;
+      ctx.save();
+      ctx.translate(position.x, position.y);
+      ctx.rotate(rotation);
+      ctx.translate(extents[0] * -0.5, extents[1] * -0.5);
+      ctx.fillRect(0, 0, extents[0], extents[1]);
+      ctx.strokeRect(1, 1, extents[0] - 2, extents[1] - 2);
+      ctx.restore();
+    });
     simulation.dots && simulation.dots.forEach(({ color, radius, body, hit }) => {
       const position = body.translation();
-      ctx.fillStyle = `hsl(${color * 360}, 60%, ${50 + hit * 50}%)`;
-      ctx.strokeStyle = `hsl(${color * 360}, 60%, 40%)`;
+      ctx.fillStyle = `hsl(${color * 280}, 50%, ${50 + hit * 50}%)`;
+      ctx.strokeStyle = `hsl(${color * 280}, 50%, 40%)`;
       ctx.beginPath();
       ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
       ctx.fill();

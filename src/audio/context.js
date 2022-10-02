@@ -7,7 +7,7 @@ const promises = [];
 const onFirstInteraction = () => {
   window.removeEventListener('mousedown', onFirstInteraction);
   context = new window.AudioContext();
-  output = new Channel({ context, filters: [{ type: 'analyser' }], gain: 0.5 });
+  output = new Channel({ context, filters: [{ type: 'analyser' }], gain: 0.8 });
   output.analyser = output.filters[0];
   output.output.connect(context.destination);
   document.addEventListener('visibilitychange', () => {

@@ -13,7 +13,7 @@
   let renderer;
   const simulation = new Simulation({
     count: 21,
-    size: { x: 240, y: 320 },
+    size: { x: 320, y: 320 },
   });
 
   onMount(() => {
@@ -42,9 +42,6 @@
     <div><div /></div>
   </div>
 {/if}
-<div class="credits">
-  <a href="https://dani.gatunes.com" rel="noopener noreferrer" target="_blank">dani@gatunes</a> © 2022
-</div>
 <a class="ribbon" href="https://github.com/sponsors/danielesteban" data-ribbon="♥ Become a sponsor" rel="noopener noreferrer" target="_blank">
   ♥ Become a sponsor
 </a>
@@ -113,18 +110,6 @@
     border-top: 0.5rem solid transparent;
     border-bottom: 0.5rem solid transparent;
     border-left: 0.5rem solid #eee;
-  }
-
-  .credits {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    text-align: right;
-    color: #999;
-  }
-
-  .credits > a {
-    color: inherit;
   }
 
   .ribbon {

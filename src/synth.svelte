@@ -58,9 +58,12 @@
         filters: [
           { type: 'distortion', amount: 256 },
           { type: 'bandpass', frequency: 200 + Math.random() * 100, Q: 0.5 },
+          { type: 'panner' },
         ],
         gain: 0.5,
-      });  
+      });
+      voice.panner = channel.filters[2];
+      voice.panner.positionZ.setValueAtTime(0.5, context.currentTime);
       channel.output.connect(output.input);
       voice.output.connect(channel.input);
 
@@ -80,9 +83,13 @@
     });
   });
 
-  simulation.onHit = ({ note, duration }) => {
+  simulation.onHit = ({ body, note, duration }) => {
     if (voices) {
-      voices[note].trigger(duration);
+      const voice = voices[note];
+      const position = body.translation();
+      voice.panner.positionX.cancelScheduledValues(0);
+      voice.panner.positionX.linearRampToValueAtTime((position.x - simulation.size.x * 0.5) / simulation.size.x * 2, voice.context.currentTime + 0.02);
+      voice.trigger(duration);
     }
   };
 </script>
@@ -95,6 +102,9 @@
   <div class="box">
     <div><div>{scale.name}</div></div>
     <div>Scale</div>
+  </div>
+  <div class="credits">
+    <a href="https://dani.gatunes.com" rel="noopener noreferrer" target="_blank">dani@gatunes</a> © 2022
   </div>
   <div class="analyser">
     <Analyser />
@@ -140,6 +150,16 @@
     color: #999;
     text-transform: uppercase;
     font-size: 0.7em;
+  }
+
+  .credits {
+    flex-grow: 1;
+    color: #666;
+    text-align: center;
+  }
+
+  .credits > a {
+    color: inherit;
   }
 
   .analyser {

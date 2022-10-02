@@ -1,5 +1,13 @@
 import Rapier from '@dimforge/rapier2d-compat';
 
+const sdBox = (p, r) => {
+  const q = { x: Math.abs(p.x) - r.x, y: Math.abs(p.y) - r.y };
+  const m = Math.min(Math.max(q.x, q.y), 0);
+  q.x = Math.max(q.x, 0) + m;
+  q.y = Math.max(q.y, 0) + m;
+  return Math.sqrt(q.x ** 2 + q.y ** 2);
+};
+
 class Simulation {
   constructor({ count, size }) {
     this.count = count;
@@ -7,6 +15,32 @@ class Simulation {
     Rapier.init()
       .then(() => {
         this.world = new Rapier.World({ x: 0, y: 0 });
+        this.boxes = [];
+        [[0.2, 0.2], [0.8, 0.2], [0.2, 0.8], [0.8, 0.8]].forEach(([x, y]) => {
+          const anchor = this.world.createRigidBody(
+            Rapier.RigidBodyDesc.fixed()
+              .setTranslation(size.x * x, size.y * y)
+          );
+          const body = this.world.createRigidBody(
+            Rapier.RigidBodyDesc.dynamic()
+              .setTranslation(size.x * x, size.y * y)
+              .setRotation(Math.random() * Math.PI * 2)
+          );
+          const s = Math.min(size.x, size.y) * 0.05;
+          const extents = [s * 0.5, s * (Math.random() * 0.25 + 0.75) * 4];
+          const collider = this.world.createCollider(
+            Rapier.ColliderDesc.cuboid(extents[0] * 0.5, extents[1] * 0.5),
+            body
+          );
+          this.world.createImpulseJoint(Rapier.JointData.revolute({ x: 0, y: 0 }, { x: 0, y: 0 }), anchor, body, true)
+            .configureMotorVelocity(0.5 + Math.random() * 0.1, 100);
+          this.boxes.push({
+            body,
+            collider,
+            extents,
+          });
+        });
+
         this.dots = [];
         for (let i = 0; i < count; i++) {
           const s = 1 + Math.random() * 2;
@@ -15,6 +49,17 @@ class Simulation {
           const findPosition = () => {
             position.x = radius + Math.random() * (size.x - radius * 2);
             position.y = radius + Math.random() * (size.y - radius * 2);
+            for (let j = 0; j < this.boxes.length; j++) {
+              const b = this.boxes[j];
+              const t = b.body.translation();
+              const r = b.body.rotation();
+              const dx = (position.x - t.x);
+              const dy = (position.y - t.y);
+              const d = sdBox({ x: dx * Math.cos(r) + dy * Math.sin(r), y: dy * Math.cos(r) - dx * Math.sin(r) }, { x: b.extents[0] * 0.5, y: b.extents[1] * 0.5 });
+              if (d <= radius) {
+                return false;
+              }
+            }
             for (let j = 0; j < i; j++) {
               const d = this.dots[j];
               const t = d.body.translation();
@@ -61,6 +106,7 @@ class Simulation {
             collider,
           });
         }
+
         for (let i = 0; i < 2; i++) {
           this.world.createCollider(
             Rapier.ColliderDesc.cuboid(size.x * 0.5, 10)
@@ -87,7 +133,7 @@ class Simulation {
     if (!world) {
       return;
     }
-    world.timestep = delta * 2;
+    world.timestep = delta;
     world.step();
 
     const count = dots.length;
