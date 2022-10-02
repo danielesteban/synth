@@ -8,6 +8,10 @@ const sdBox = (p, r) => {
   return Math.sqrt(q.x ** 2 + q.y ** 2);
 };
 
+const sdSphere = (p, r) => (
+  Math.sqrt(p.x ** 2 + p.y ** 2) - r
+);
+
 class Simulation {
   constructor({ count, size }) {
     this.count = count;
@@ -53,17 +57,24 @@ class Simulation {
               const b = this.boxes[j];
               const t = b.body.translation();
               const r = b.body.rotation();
-              const dx = (position.x - t.x);
-              const dy = (position.y - t.y);
-              const d = sdBox({ x: dx * Math.cos(r) + dy * Math.sin(r), y: dy * Math.cos(r) - dx * Math.sin(r) }, { x: b.extents[0] * 0.5, y: b.extents[1] * 0.5 });
-              if (d <= radius) {
+              const dx = position.x - t.x;
+              const dy = position.y - t.y;
+              const dist = sdBox(
+                { x: dx * Math.cos(r) + dy * Math.sin(r), y: dy * Math.cos(r) - dx * Math.sin(r) },
+                { x: b.extents[0] * 0.5, y: b.extents[1] * 0.5 }
+              );
+              if (dist <= radius) {
                 return false;
               }
             }
             for (let j = 0; j < i; j++) {
               const d = this.dots[j];
               const t = d.body.translation();
-              if (Math.sqrt((position.x - t.x) ** 2 + (position.y - t.y) ** 2) <= (radius + d.radius)) {
+              const dist = sdSphere(
+                { x: position.x - t.x, y: position.y - t.y },
+                d.radius
+              );
+              if (dist <= radius) {
                 return false;
               }
             }
@@ -119,16 +130,8 @@ class Simulation {
       });
   }
 
-  hit(dot) {
-    const { onHit } = this;
-    if (onHit && dot.hit < 0.5) {
-      onHit(dot);
-    }
-    dot.hit = 1;
-  }
-
   step(delta) {
-    const { dots, world } = this;
+    const { dots, world, onHit } = this;
     if (!world) {
       return;
     }
@@ -141,11 +144,14 @@ class Simulation {
       world.contactsWith(dot.collider, (collider) => {
         world.contactPair(dot.collider, collider, (manifold) => {
           if (manifold.contactDist() < 0) {
-            this.hit(dot);
+            if (onHit && dot.hit < 0.5) {
+              onHit(dot);
+            }
+            dot.hit = 1;
           }
         });
       });
-      dot.hit = Math.max(dot.hit - delta * 2, 0);
+      dot.hit = Math.max(dot.hit - delta / dot.duration, 0);
     }
   }
 }
