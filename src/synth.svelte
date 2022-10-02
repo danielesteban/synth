@@ -88,7 +88,7 @@
       const voice = voices[note];
       const position = body.translation();
       voice.panner.positionX.cancelScheduledValues(0);
-      voice.panner.positionX.linearRampToValueAtTime((position.x - simulation.size.x * 0.5) / simulation.size.x * 2, voice.context.currentTime + 0.02);
+      voice.panner.positionX.linearRampToValueAtTime((position.x - simulation.size.x * 0.5) / simulation.size.x * 2, voice.context.deltaTime);
       voice.trigger(duration);
     }
   };

@@ -142,7 +142,7 @@ class Channel {
     output.gain.cancelScheduledValues(0);
     output.gain.linearRampToValueAtTime(
       target,
-      context.currentTime + 0.02
+      context.deltaTime
     );
   }
 }

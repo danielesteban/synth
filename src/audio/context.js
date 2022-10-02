@@ -7,6 +7,7 @@ const promises = [];
 const onFirstInteraction = () => {
   window.removeEventListener('mousedown', onFirstInteraction);
   context = new window.AudioContext();
+  context.deltaTime = context.currentTime + 1 / 60;
   output = new Channel({ context, filters: [{ type: 'analyser' }], gain: 0.8 });
   output.analyser = output.filters[0];
   output.output.connect(context.destination);

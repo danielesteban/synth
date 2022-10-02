@@ -30,11 +30,11 @@ class Voice {
     output.gain.cancelScheduledValues(0);
     output.gain.linearRampToValueAtTime(
       1,
-      context.currentTime + 0.02
+      context.deltaTime
     );
     output.gain.linearRampToValueAtTime(
       0,
-      context.currentTime + duration
+      context.deltaTime + duration
     );
   }
 }

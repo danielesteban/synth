@@ -5,9 +5,9 @@
   import Simulation from './simulation.js';
   import Synth from './synth.svelte';
 
-  let hasAudioContext = false;
-  Audio().then(() => {
-    hasAudioContext = true;
+  let context;
+  Audio().then((audio) => {
+    context = audio.context;
   });
 
   let renderer;
@@ -24,8 +24,11 @@
     const animate = () => {
       requestAnimationFrame(animate);
       const time = performance.now() / 1000;
-      const delta = Math.min(time - clock, 1);
+      const delta = Math.min(time - clock, 0.1);
       clock = time;
+      if (context) {
+        context.deltaTime = context.currentTime + delta;
+      }
       simulation.step(delta);
       renderer.draw();
     };
@@ -37,7 +40,7 @@
   <Renderer bind:this={renderer} simulation={simulation} />
   <Synth simulation={simulation} />
 </div>
-{#if !hasAudioContext}
+{#if !context}
   <div class="play">
     <div><div /></div>
   </div>
