@@ -53,7 +53,18 @@ class Simulation {
           const findPosition = () => {
             position.x = radius + Math.random() * (size.x - radius * 2);
             position.y = radius + Math.random() * (size.y - radius * 2);
-            for (let j = 0; j < this.boxes.length; j++) {
+            for (let j = 0; j < i; j++) {
+              const d = this.dots[j];
+              const t = d.body.translation();
+              const dist = sdSphere(
+                { x: position.x - t.x, y: position.y - t.y },
+                d.radius
+              );
+              if (dist <= radius) {
+                return false;
+              }
+            }
+            for (let j = 0, l = this.boxes.length; j < l; j++) {
               const b = this.boxes[j];
               const t = b.body.translation();
               const r = b.body.rotation();
@@ -62,17 +73,6 @@ class Simulation {
               const dist = sdBox(
                 { x: dx * Math.cos(r) + dy * Math.sin(r), y: dy * Math.cos(r) - dx * Math.sin(r) },
                 { x: b.extents.x * 0.5, y: b.extents.y * 0.5 }
-              );
-              if (dist <= radius) {
-                return false;
-              }
-            }
-            for (let j = 0; j < i; j++) {
-              const d = this.dots[j];
-              const t = d.body.translation();
-              const dist = sdSphere(
-                { x: position.x - t.x, y: position.y - t.y },
-                d.radius
               );
               if (dist <= radius) {
                 return false;
