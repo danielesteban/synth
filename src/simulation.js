@@ -31,9 +31,9 @@ class Simulation {
               .setRotation(Math.random() * Math.PI * 2)
           );
           const s = Math.min(size.x, size.y) * 0.05;
-          const extents = [s * 0.5, s * (Math.random() * 0.25 + 0.75) * 4];
+          const extents = { x: s * 0.5, y: s * (Math.random() * 0.25 + 0.75) * 4 };
           const collider = this.world.createCollider(
-            Rapier.ColliderDesc.cuboid(extents[0] * 0.5, extents[1] * 0.5),
+            Rapier.ColliderDesc.cuboid(extents.x * 0.5, extents.y * 0.5),
             body
           );
           this.world.createImpulseJoint(Rapier.JointData.revolute({ x: 0, y: 0 }, { x: 0, y: 0 }), anchor, body, true)
@@ -61,7 +61,7 @@ class Simulation {
               const dy = position.y - t.y;
               const dist = sdBox(
                 { x: dx * Math.cos(r) + dy * Math.sin(r), y: dy * Math.cos(r) - dx * Math.sin(r) },
-                { x: b.extents[0] * 0.5, y: b.extents[1] * 0.5 }
+                { x: b.extents.x * 0.5, y: b.extents.y * 0.5 }
               );
               if (dist <= radius) {
                 return false;

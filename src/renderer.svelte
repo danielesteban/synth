@@ -21,9 +21,9 @@
       ctx.save();
       ctx.translate(position.x, position.y);
       ctx.rotate(rotation);
-      ctx.translate(extents[0] * -0.5, extents[1] * -0.5);
-      ctx.fillRect(0, 0, extents[0], extents[1]);
-      ctx.strokeRect(1, 1, extents[0] - 2, extents[1] - 2);
+      ctx.translate(extents.x * -0.5, extents.y * -0.5);
+      ctx.fillRect(0, 0, extents.x, extents.y);
+      ctx.strokeRect(1, 1, extents.x - 2, extents.y - 2);
       ctx.restore();
     });
     simulation.dots && simulation.dots.forEach(({ color, radius, body, hit }) => {
